@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Conectores flip cards</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: one centred study column; a single large card is the hero, controls sit beneath it */
+:root{
+  --bg:#eef2f1; --surface:#ffffff; --ink:#15302e; --muted:#5a706d;
+  --line:#d3dedb; --accent:#0f6b63; --accent-ink:#ffffff; --back:#16413d; --back-ink:#f3f7f6; --gold:#c9932b;
+  --display:"Young Serif",Georgia,"Times New Roman",serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1716; --surface:#172422; --ink:#e6eeec; --muted:#93a8a4;
+  --line:#2a3b38; --accent:#4fb3a8; --accent-ink:#0b1514; --back:#21544f; --back-ink:#f3f7f6; --gold:#e0b257; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1716; --surface:#172422; --ink:#e6eeec; --muted:#93a8a4;
+  --line:#2a3b38; --accent:#4fb3a8; --accent-ink:#0b1514; --back:#21544f; --back-ink:#f3f7f6; --gold:#e0b257; color-scheme:dark}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 40px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,5vw,34px);line-height:1.15;margin:0;text-wrap:balance}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+select,button{font:inherit;color:var(--ink)}
+select{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0;max-width:100%;flex:1 1 220px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:8px 12px;cursor:pointer;font-weight:500;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.scene{perspective:1400px}
+.card{position:relative;width:100%;aspect-ratio:8/5;max-width:100%;cursor:pointer;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,.7,.2,1);border:0;padding:0;background:none;display:block}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:24px;text-align:center}
+.front{background:var(--surface);border:1px solid var(--line);box-shadow:0 10px 30px -18px rgba(10,40,36,.45)}
+.back{background:var(--back);color:var(--back-ink);transform:rotateY(180deg)}
+.cat{position:absolute;top:16px;left:18px;right:18px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;text-align:left;color:var(--muted)}
+.back .cat{color:rgba(243,247,246,.7)}
+.lang{position:absolute;bottom:14px;right:18px;font-size:12px;letter-spacing:.1em;font-weight:600;color:var(--gold)}
+.word{font-family:var(--display);font-size:clamp(26px,7vw,46px);line-height:1.15;text-wrap:balance;overflow-wrap:anywhere}
+.hint{font-size:13px;color:var(--muted)}
+.back .hint{color:rgba(243,247,246,.7)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.btn{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:hover{border-color:var(--accent)}
+button:focus-visible,select:focus-visible,.card:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.count{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:500}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);transition:width .25s}
+.keys{font-size:13px;color:var(--muted)}
+kbd{font-family:var(--body);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--surface);font-size:12px}
+@media (max-width:480px){.card{aspect-ratio:4/3}.btn{padding:10px 12px}.keys{display:none}}
+@media (prefers-reduced-motion:reduce){.card{transition:none}.bar span{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Español · nivel C1</span>
+    <h1>Conectores textuales</h1>
+  </header>
+
+  <div class="toolbar">
+    <select id="cat" aria-label="Kies categorie"></select>
+    <div class="seg" role="group" aria-label="Richting">
+      <button id="dir-es" aria-pressed="true">ES → NL</button>
+      <button id="dir-nl" aria-pressed="false">NL → ES</button>
+    </div>
+  </div>
+
+  <div class="scene">
+    <button class="card" id="card" aria-label="Kaart omdraaien">
+      <div class="face front"><span class="cat" id="f-cat"></span><span class="word" id="f-word"></span><span class="hint">Tik om om te draaien</span><span class="lang" id="f-lang">ES</span></div>
+      <div class="face back"><span class="cat" id="b-cat"></span><span class="word" id="b-word"></span><span class="lang" id="b-lang">NL</span></div>
+    </button>
+  </div>
+
+  <div class="bar" aria-hidden="true"><span id="bar"></span></div>
+
+  <div class="nav">
+    <button class="btn" id="prev" aria-label="Vorige kaart">← Vorige</button>
+    <span class="count" id="count"></span>
+    <button class="btn primary" id="next" aria-label="Volgende kaart">Volgende →</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn" id="shuffle">Opnieuw schudden</button>
+    <button class="btn" id="order">Originele volgorde</button>
+  </div>
+  <p class="keys">Toetsen: <kbd>spatie</kbd> omdraaien · <kbd>←</kbd> <kbd>→</kbd> vorige / volgende · <kbd>S</kbd> schudden</p>
+</div>
+
+<script>
+const CATS={
+A:"Añadir información",B:"Contrastar ideas y expresar oposición",C:"Expresar causa y justificación",
+D:"Expresar consecuencia",E:"Expresar finalidad",F:"Ejemplos, aclaraciones y reformulaciones",
+G:"Ordenar el discurso",H:"Expresar condición e hipótesis",I:"Expresar concesión",
+J:"Opinión, valoración y certeza",K:"Oposición a una expectativa",L:"Tiempo y simultaneidad",
+M:"Concluir, resumir y sintetizar",N:"Corregir o reformular una idea"};
+const RAW={
+A:[["Además","Bovendien"],["Asimismo","Eveneens / Daarnaast"],["Igualmente","Eveneens"],["A su vez","Op zijn beurt"],["Es más","Sterker nog"],["Incluso","Zelfs"],["Por añadidura","Daar komt bij dat"],["Cabe añadir que","Hieraan moet worden toegevoegd dat"]],
+B:[["Sin embargo","Echter / Toch"],["No obstante","Niettemin"],["Ahora bien","Dat gezegd hebbende"],["En cambio","Daarentegen"],["Por el contrario","Integendeel"],["Aun así","Toch / Desondanks"],["Con todo","Desondanks"],["Mientras que","Terwijl"],["Si bien","Hoewel"],["Pese a ello","Desondanks"],["Por más que","Hoezeer … ook"]],
+C:[["Debido a que","Doordat"],["Puesto que","Aangezien"],["Dado que","Gezien het feit dat"],["Ya que","Omdat / Aangezien"],["En vista de que","Gezien het feit dat"],["A raíz de","Naar aanleiding van"],["Por culpa de","Door / Door toedoen van"],["Gracias a","Dankzij"],["Habida cuenta de que","In aanmerking genomen dat"],["Toda vez que","Aangezien"]],
+D:[["Por lo tanto","Daarom"],["Por consiguiente","Bijgevolg"],["En consecuencia","Als gevolg daarvan"],["Así pues","Dus / Derhalve"],["De ahí que","Vandaar dat"],["Por ende","Derhalve"],["De modo que","Zodat"],["Por esta razón","Om deze reden"],["De resultas de ello","Als gevolg daarvan"],["De ahí se desprende que","Hieruit volgt dat"]],
+E:[["Para que","Zodat / Opdat"],["A fin de que","Opdat"],["Con el fin de que","Met als doel dat"],["Con vistas a","Met het oog op"],["A efectos de","Ten behoeve van"],["Con miras a","Met het oog op"],["A fin de","Om … te"],["Con el propósito de","Met het doel om"]],
+F:[["Por ejemplo","Bijvoorbeeld"],["En concreto","Concreet"],["En particular","In het bijzonder"],["A saber","Namelijk"],["Es decir","Dat wil zeggen"],["O sea","Met andere woorden"],["Dicho de otro modo","Anders gezegd"],["Más concretamente","Meer bepaald"],["En otras palabras","Met andere woorden"],["Conviene precisar que","Het is belangrijk te verduidelijken dat"]],
+G:[["En primer lugar","Ten eerste"],["En segundo lugar","Ten tweede"],["Por una parte","Enerzijds"],["Por otra parte","Anderzijds"],["Por un lado","Aan de ene kant"],["Por otro lado","Aan de andere kant"],["A continuación","Vervolgens"],["Acto seguido","Meteen daarna"],["Finalmente","Ten slotte"],["Por último","Tot slot"],["Para empezar","Om te beginnen"],["Llegados a este punto","Op dit punt aangekomen"],["En lo que respecta a","Wat betreft"],["En cuanto a","Wat betreft"],["Por lo que se refiere a","Wat betreft"]],
+H:[["Siempre que","Mits / Op voorwaarde dat"],["A condición de que","Op voorwaarde dat"],["Con tal de que","Mits"],["En caso de que","In het geval dat"],["A menos que","Tenzij"],["Salvo que","Tenzij"],["Siempre y cuando","Zolang / Mits"],["De lo contrario","Anders"],["En el supuesto de que","In het geval dat"],["De ser así","Als dat zo is"]],
+I:[["Aunque","Hoewel"],["A pesar de que","Ondanks het feit dat"],["Pese a que","Hoewel"],["Si bien","Hoewel"],["Por mucho que","Hoeveel … ook"],["Por más que","Hoezeer … ook"],["Aun cuando","Zelfs als / Hoewel"],["Incluso si","Zelfs als"],["Sea como fuere","Hoe dan ook"],["En cualquier caso","In ieder geval"]],
+J:[["Desde mi punto de vista","Vanuit mijn standpunt"],["A mi juicio","Naar mijn oordeel"],["A mi modo de ver","Naar mijn mening"],["En mi opinión","Naar mijn mening"],["Cabe destacar que","Het is vermeldenswaard dat"],["Conviene señalar que","Het is belangrijk op te merken dat"],["Es indudable que","Het staat buiten kijf dat"],["Todo parece indicar que","Alles lijkt erop te wijzen dat"],["Presumiblemente","Vermoedelijk"],["A todas luces","Overduidelijk"],["En rigor","Strikt genomen"],["En principio","In principe"]],
+K:[["Aun así","Toch"],["Con todo y con eso","Desondanks"],["Pese a todo","Ondanks alles"],["De todos modos","Hoe dan ook"],["En cualquier caso","In ieder geval"],["A pesar de todo","Ondanks alles"],["Contra todo pronóstico","Tegen alle verwachtingen in"]],
+L:[["Mientras tanto","Ondertussen"],["Entretanto","Intussen"],["A medida que","Naarmate"],["Conforme","Naarmate / Overeenkomstig"],["Una vez que","Zodra"],["Tan pronto como","Zodra"],["Siempre que (temporal)","Telkens wanneer"],["Hasta que","Totdat"],["Previamente","Vooraf"],["Posteriormente","Vervolgens"],["A partir de entonces","Vanaf dat moment"],["En última instancia","Uiteindelijk"]],
+M:[["En conclusión","Concluderend"],["En definitiva","Kortom"],["En suma","Alles bij elkaar"],["En síntesis","Samengevat"],["En resumidas cuentas","Alles bij elkaar genomen"],["En última instancia","Uiteindelijk"],["En pocas palabras","Kortom"],["A modo de conclusión","Ter afsluiting"],["En conclusión, cabe afirmar que","Concluderend kan worden gesteld dat"],["En definitiva, todo apunta a que","Alles wijst er uiteindelijk op dat"]],
+N:[["Más bien","Eerder"],["En realidad","Eigenlijk"],["De hecho","In feite"],["Lejos de","Verre van"],["Al contrario de lo que","In tegenstelling tot wat"],["No es que…, sino que…","Het is niet zo dat…, maar dat…"],["Antes bien","Integendeel"],["En lugar de","In plaats van"]]
+};
+const ALL=[];
+for(const k of Object.keys(RAW)) RAW[k].forEach(([es,nl])=>ALL.push({es,nl,k}));
+
+const $=id=>document.getElementById(id);
+const sel=$("cat");
+sel.add(new Option(`Alle categorieën (${ALL.length})`,"all"));
+for(const k of Object.keys(CATS)) sel.add(new Option(`${k}. ${CATS[k]} (${RAW[k].length})`,k));
+
+let deck=[],i=0,dir="es",shuffled=true;
+function load(){try{return JSON.parse(localStorage.getItem("conectores")||"{}")}catch(e){return {}}}
+function save(){try{localStorage.setItem("conectores",JSON.stringify({cat:sel.value,dir}))}catch(e){}}
+
+function build(){
+  deck=ALL.filter(c=>sel.value==="all"||c.k===sel.value);
+  if(shuffled) shuffle(deck);
+  i=0;render(false);
+}
+function shuffle(a){for(let j=a.length-1;j>0;j--){const r=Math.floor(Math.random()*(j+1));[a[j],a[r]]=[a[r],a[j]]}}
+function render(keepFlip){
+  const c=deck[i],card=$("card");
+  if(!keepFlip) card.classList.remove("flipped");
+  const label=`${c.k}. ${CATS[c.k]}`;
+  const front=dir==="es"?c.es:c.nl, back=dir==="es"?c.nl:c.es;
+  const set=()=>{
+    $("f-word").textContent=front;$("b-word").textContent=back;
+    $("f-cat").textContent=label;$("b-cat").textContent=label;
+    $("f-lang").textContent=dir==="es"?"ES":"NL";$("b-lang").textContent=dir==="es"?"NL":"ES";
+  };
+  // wait for the flip back before swapping text, so the answer never shows early
+  if(!keepFlip && card.dataset.wasFlipped==="1" && !matchMedia("(prefers-reduced-motion: reduce)").matches){setTimeout(set,220)}else set();
+  card.dataset.wasFlipped="0";
+  $("count").textContent=`${i+1} / ${deck.length}`;
+  $("bar").style.width=`${(i+1)/deck.length*100}%`;
+}
+function flip(){const c=$("card");c.classList.toggle("flipped");c.dataset.wasFlipped=c.classList.contains("flipped")?"1":"0"}
+// after the last card a shuffled deck is reshuffled, so every round has a new order
+function go(d){if(d>0&&i===deck.length-1&&shuffled)shuffle(deck);i=(i+d+deck.length)%deck.length;render(false)}
+function setDir(d){dir=d;$("dir-es").setAttribute("aria-pressed",d==="es");$("dir-nl").setAttribute("aria-pressed",d==="nl");save();render(false)}
+
+$("card").addEventListener("click",flip);
+$("next").addEventListener("click",()=>go(1));
+$("prev").addEventListener("click",()=>go(-1));
+$("shuffle").addEventListener("click",()=>{shuffled=true;build()});
+$("order").addEventListener("click",()=>{shuffled=false;build()});
+$("dir-es").addEventListener("click",()=>setDir("es"));
+$("dir-nl").addEventListener("click",()=>setDir("nl"));
+sel.addEventListener("change",()=>{save();build()});
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="SELECT")return;
+  if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}
+  else if(e.key==="ArrowRight")go(1);
+  else if(e.key==="ArrowLeft")go(-1);
+  else if(e.key.toLowerCase()==="s"){shuffled=true;build()}
+});
+// touch swipe
+let sx=null;
+$("card").addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
+$("card").addEventListener("touchend",e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>50){e.preventDefault();go(dx<0?1:-1)}});
+
+const st=load();
+if(st.cat&&[...sel.options].some(o=>o.value===st.cat)) sel.value=st.cat;
+if(st.dir==="nl"){dir="nl";$("dir-es").setAttribute("aria-pressed","false");$("dir-nl").setAttribute("aria-pressed","true")}
+build();
+</script>
+</body>
+</html>
