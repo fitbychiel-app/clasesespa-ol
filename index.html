@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Conectores flip cards</title>
+<title>Clases de español</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap">
@@ -59,6 +59,12 @@ button:focus-visible,select:focus-visible,.card:focus-visible{outline:3px solid 
 kbd{font-family:var(--body);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--surface);font-size:12px}
 @media (max-width:480px){.card{aspect-ratio:4/3}.btn{padding:10px 12px}.keys{display:none}}
 @media (prefers-reduced-motion:reduce){.card{transition:none}.bar span{transition:none}}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs a{padding:10px 4px;margin-right:14px;text-decoration:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.word.long{font-size:clamp(20px,4.6vw,30px)}
+.word.xlong{font-size:clamp(17px,3.8vw,24px)}
 </style>
 </head>
 <body>
@@ -66,8 +72,13 @@ kbd{font-family:var(--body);border:1px solid var(--line);border-bottom-width:2px
 <div class="wrap">
   <header>
     <span class="eyebrow">Español · nivel C1</span>
-    <h1>Conectores textuales</h1>
+    <h1 id="title">Conectores textuales</h1>
   </header>
+
+  <nav class="tabs" aria-label="Onderdelen">
+    <a href="#conectores" id="tab-conectores">Conectores</a>
+    <a href="#palabras" id="tab-palabras">Spaanse woorden leren</a>
+  </nav>
 
   <div class="toolbar">
     <select id="cat" aria-label="Kies categorie"></select>
@@ -100,13 +111,13 @@ kbd{font-family:var(--body);border:1px solid var(--line);border-bottom-width:2px
 </div>
 
 <script>
-const CATS={
+const CONECTORES_CATS={
 A:"Añadir información",B:"Contrastar ideas y expresar oposición",C:"Expresar causa y justificación",
 D:"Expresar consecuencia",E:"Expresar finalidad",F:"Ejemplos, aclaraciones y reformulaciones",
 G:"Ordenar el discurso",H:"Expresar condición e hipótesis",I:"Expresar concesión",
 J:"Opinión, valoración y certeza",K:"Oposición a una expectativa",L:"Tiempo y simultaneidad",
 M:"Concluir, resumir y sintetizar",N:"Corregir o reformular una idea"};
-const RAW={
+const CONECTORES={
 A:[["Además","Bovendien"],["Asimismo","Eveneens / Daarnaast"],["Igualmente","Eveneens"],["A su vez","Op zijn beurt"],["Es más","Sterker nog"],["Incluso","Zelfs"],["Por añadidura","Daar komt bij dat"],["Cabe añadir que","Hieraan moet worden toegevoegd dat"]],
 B:[["Sin embargo","Echter / Toch"],["No obstante","Niettemin"],["Ahora bien","Dat gezegd hebbende"],["En cambio","Daarentegen"],["Por el contrario","Integendeel"],["Aun así","Toch / Desondanks"],["Con todo","Desondanks"],["Mientras que","Terwijl"],["Si bien","Hoewel"],["Pese a ello","Desondanks"],["Por más que","Hoezeer … ook"]],
 C:[["Debido a que","Doordat"],["Puesto que","Aangezien"],["Dado que","Gezien het feit dat"],["Ya que","Omdat / Aangezien"],["En vista de que","Gezien het feit dat"],["A raíz de","Naar aanleiding van"],["Por culpa de","Door / Door toedoen van"],["Gracias a","Dankzij"],["Habida cuenta de que","In aanmerking genomen dat"],["Toda vez que","Aangezien"]],
@@ -122,31 +133,65 @@ L:[["Mientras tanto","Ondertussen"],["Entretanto","Intussen"],["A medida que","N
 M:[["En conclusión","Concluderend"],["En definitiva","Kortom"],["En suma","Alles bij elkaar"],["En síntesis","Samengevat"],["En resumidas cuentas","Alles bij elkaar genomen"],["En última instancia","Uiteindelijk"],["En pocas palabras","Kortom"],["A modo de conclusión","Ter afsluiting"],["En conclusión, cabe afirmar que","Concluderend kan worden gesteld dat"],["En definitiva, todo apunta a que","Alles wijst er uiteindelijk op dat"]],
 N:[["Más bien","Eerder"],["En realidad","Eigenlijk"],["De hecho","In feite"],["Lejos de","Verre van"],["Al contrario de lo que","In tegenstelling tot wat"],["No es que…, sino que…","Het is niet zo dat…, maar dat…"],["Antes bien","Integendeel"],["En lugar de","In plaats van"]]
 };
-const ALL=[];
-for(const k of Object.keys(RAW)) RAW[k].forEach(([es,nl])=>ALL.push({es,nl,k}));
 
+const PALABRAS_CATS={
+"2206":"Les 22 juni","2906":"Les 29 juni","1307":"Les 13 juli","2007":"Les 20 juli","3108":"Les 31 augustus",
+"1409":"Les 14 september","2809":"Les 28 september","0510":"Les 5 oktober","2610":"Les 26 oktober",
+"x1":"Losse lijst · formeel","x2":"Losse lijst · teksten","x3":"Losse lijst · diversen","x4":"Losse lijst · dieren"};
+const PALABRAS={
+"2206":[["Barra de dominadas","Optrekstang"],["Traducción","Vertaling"],["Acabar + gerundio","Uiteindelijk (iets) doen · acabé llorando = ik moest uiteindelijk huilen"],["Extender","Uitbreiden / verspreiden"],["Desesperadamente","Wanhopig"],["Espontáneamente","Spontaan"],["Túnez","Tunesië"],["Empatar","Gelijkspelen"],["Pausa de hidratación","Drinkpauze"],["Clasificarse","Zich kwalificeren"],["Eurocopa","EK voetbal"],["Azafata","Stewardess"],["Primera clase","Eerste klas"],["Sanción / multa","Sanctie / boete"],["Música muy alta","Heel harde muziek"],["En tierra","Aan de grond"],["Echarle (del avión)","Hem eruit zetten (uit het vliegtuig)"],["Destino","Bestemming"],["Ponerlo en la lista negra","Hem op de zwarte lijst zetten"],["Me habría encantado que hubieras venido a la fiesta","Ik had het geweldig gevonden als je naar het feest was gekomen"],["Lógico → lógicamente","Logisch → logischerwijs"]],
+"2906":[["Iban a viajar","Ze zouden gaan reizen"],["Corriente","Stroming / stroom"],["Torre","Toren"],["Rayos","Bliksem"],["Menos mal","Gelukkig maar"],["Refugiarse","Schuilen / je toevlucht zoeken"],["Tabla de surf","Surfplank"],["El remo","De roeispaan"],["Dinamarca","Denemarken"],["Latín","Latijn"],["Griego","Grieks"],["Simple","Simpel / eenvoudig"],["Despedida de soltera","Vrijgezellenfeest"],["Explotar","Ontploffen"],["Rosáceo","Rozeachtig"],["Fundirse","Smelten"],["Fijarse en","Letten op / focussen op"],["Gastarse","Opraken / verslijten"],["Agobiarse","Zich gestrest of overweldigd voelen"],["Atónito/a","Verbijsterd"],["Huella (dactilar)","(Vinger)afdruk"],["Pretender","Van plan zijn / proberen (niet: doen alsof!)"],["Fingir","Doen alsof"],["Mientras tanto","Ondertussen / voorlopig"],["Ingenuo/a","Naïef"],["¡Vaya giro!","Wat een wending!"],["Tirar al suelo","Op de grond gooien"],["Poner de tu parte","Je steentje bijdragen"],["Blando","Zacht"],["Me da dentera","Ik krijg er rillingen van (zoals nagels op een schoolbord)"],["Luxemburgo","Luxemburg"],["Solicitar","Solliciteren / aanvragen"],["Peleas","Gevechten / ruzies"],["Resultado","Resultaat"],["Marroquíes","Marokkanen"],["Pitar","Toeteren / fluiten"]],
+"1307":[["Esquina","(Straat)hoek"],["Está lleno de gente","Het zit vol met mensen"],["Casa familiar","Ouderlijk huis"],["Visualmente","Visueel"],["Quería hacerlo ella misma","Ze wilde het zelf doen"],["Montar (un mueble)","(Een meubel) in elkaar zetten"],["Hacer caso · ¡Hazme caso!","Luisteren naar · Luister naar me!"],["Le dolía la barriga","Hij/zij had buikpijn"],["Arrastrar el cansancio","Vermoeidheid met je meeslepen"],["Portero","Keeper / portier"],["Trato de favor","Voorkeursbehandeling"],["Descarado","Brutaal / schaamteloos"],["Futbolista","Voetballer"],["Es uno de los mejores … de la historia","Hij is een van de beste … aller tijden"],["Participar","Deelnemen"],["Noruega","Noorwegen"],["Encendido/a (encender)","Aan / aangestoken (aanzetten, aansteken)"],["Cuanto antes, mejor","Hoe eerder, hoe beter"],["Letra","Letter / handschrift"],["Voy a mostraros las fotos cuando esté en casa","Ik laat jullie de foto's zien als ik thuis ben"],["Fiel","Trouw"],["Currículum","Cv"],["Recursos humanos","Personeelszaken (HR)"],["Decente","Fatsoenlijk"],["Conciso","Beknopt"],["Sobrar ≠ faltar","Over zijn ≠ ontbreken"],["Traspiés","Misstap / struikeling (tropezarse = struikelen)"]],
+"2007":[["Es muy sufrido","Hij kan veel verdragen"],["Dar la espalda","De rug toekeren"],["Juego limpio","Fair play"],["Derrota ≠ victoria","Nederlaag ≠ overwinning"],["Adrenalina","Adrenaline"],["No me emociona","Het doet me niet zoveel"],["Polígono (industrial)","Industrieterrein"],["Ternera","Kalfsvlees"],["Análisis de sangre","Bloedonderzoek"],["Sacar sangre","Bloed afnemen"],["Ponerse vacunas","Zich laten vaccineren"],["Traumatizar","Traumatiseren"],["No me acuerdo = no lo recuerdo","Ik weet het niet meer"],["Garganta","Keel"],["Espero que + subjuntivo","Ik hoop dat + subjunctief"],["Urgencias","Spoedeisende hulp"],["Lo más doloroso","Het pijnlijkste"],["Pinza","Pincet / knijper"],["El antibiótico","Het antibioticum"],["Infección","Infectie"],["Pesarse","Zich wegen"],["Me quedé en … kilos","Ik kwam uit op … kilo"],["La bola","De bal / de bol"],["Creció","Het groeide"],["Equivocado","Fout / verkeerd"],["Gotas","Druppels"],["Ser atento","Attent zijn"],["Estar atento","Opletten"]],
+"3108":[["Se me hace bola","Het blijft in mijn mond rondgaan / het wordt me te veel"],["La reserva","De reservering"],["Dar una vuelta","Een rondje lopen"],["Ballenas","Walvissen"],["Montaña rusa","Achtbaan"],["Cueva","Grot"],["Orca","Orka"],["Aseo","Toilet"],["Castillo hinchable","Springkussen"],["Sábana","Laken"],["Sobrecolchón","Topper (matras)"],["Las Ardenas","De Ardennen"],["Me cubre / me llega (hasta aquí)","Het komt tot hier (bijv. het water)"],["Amberes","Antwerpen"],["Borrar","Wissen / uitgummen"],["Peluca","Pruik"],["Cigarro / cigarrillo","Sigaret"],["Puro","Sigaar"],["Tomar el sol","Zonnebaden"],["Parece una pasa","Hij/zij lijkt wel een rozijn"],["Madurito interesante","Aantrekkelijke oudere man"],["¡Faltaría más!","Maar natuurlijk! / Vanzelfsprekend!"]],
+"1409":[["Fui donde mis padres","Ik ging naar mijn ouders"],["Estaba invitada","Ik was uitgenodigd"],["Muy movido","Heel druk / hectisch"],["Lagunas mentales","Gaten in je geheugen"],["Tipo test","Meerkeuze"],["A pesar de","Ondanks"],["Incapaz","Niet in staat"],["Enfrentarse a","De confrontatie aangaan met"],["Interlocutor","Gesprekspartner"],["Adquirir","Verwerven / aanschaffen"],["Párrafo","Alinea"],["Es por eso","Daarom"],["Cuyo","Wiens / waarvan"],["Fin","Doel"],["Incrementar","Verhogen / laten toenemen"],["En lo que se refiere a","Wat betreft"],["Proporcionar","Verschaffen / geven"],["Consiste en","Het bestaat uit / het draait om"],["Alcanzar · para que alcance","Bereiken · zodat hij bereikt (subjunctief)"],["Avanzar","Vooruitgaan"],["Breve","Kort"],["Solventar","Oplossen"]],
+"2809":[["Desenvolverse","Zich redden"],["Estricto","Streng"],["Estaba riéndome","Ik was aan het lachen"],["Estar gracioso/a","Grappig doen (op dat moment)"],["No bajes la guardia","Blijf alert"],["Campamento","Kamp"],["Campo","Veld / platteland"],["La idea fue que llegaran","Het idee was dat ze zouden aankomen"],["Atasco (de tráfico)","File"],["Puede que llegue un poco tarde","Misschien kom ik iets te laat"],["La tienda de campaña","De tent"],["Cama hinchable","Luchtbed"],["Sudadera","Hoodie / trui"],["Saco de dormir","Slaapzak"],["Aislar · colchón aislante","Isoleren · isolatiematje"],["No quiero reconocerlo / admitirlo","Ik wil het niet toegeven"],["Sorprender → la sorpresa","Verrassen → de verrassing"],["Setas","Paddenstoelen"],["Estar desbordado (el río)","Buiten de oevers getreden (de rivier)"],["El impermeable / el chubasquero","De regenjas"],["Inundarse","Overstromen"],["Cani","Patserige jongere (vgl. 'tokkie')"],["Embajada","Ambassade"],["Pijo","Kakker"],["Palabrotas","Scheldwoorden"],["Dialecto","Dialect"],["Enfermedades","Ziektes"],["Malhablados","Mensen die veel vloeken"],["Como si nada","Alsof er niets aan de hand is"]],
+"0510":[["Hacía 4 años que no iba…","Ik was er al 4 jaar niet geweest…"],["Pasar el rato","De tijd doden"],["Hacer la compra","Boodschappen doen"],["Fui vegano 2 años","Ik ben 2 jaar veganist geweest"],["Sirope de agave","Agavesiroop"],["Queso fresco","Verse kaas"],["Céntimo","Cent"],["Mareado","Misselijk / duizelig"],["Saciado/a (saciar)","Verzadigd"],["Implementar","Invoeren / implementeren"],["La merienda","Het middagtussendoortje"],["Para llegar a la cena","Om het tot het avondeten vol te houden"],["Ligero/a","Licht"],["Arándanos","Blauwe bessen"],["Higos","Vijgen"],["Palabrota / taco","Scheldwoord / vloek"],["Por descarte","Door wegstreping"],["Cambiar en función de / en base a","Veranderen afhankelijk van"],["Prestar atención","Opletten / aandacht schenken"],["Ya que","Omdat"],["En buena medida","In grote mate"],["Permitir seleccionar","Laten kiezen"],["Terreno","Terrein / grond"],["Una vez","Zodra / eenmaal"],["Deteriorar","Beschadigen"],["Proceder a","Overgaan tot"],["Estrujar","Uitknijpen / verfrommelen"],["Más allá de","Verder dan / afgezien van"],["Tanto… como…","Zowel… als…"],["Tanto es así que…","Zozeer zelfs dat…"]],
+"2610":[["Le da vergüenza","Hij/zij schaamt zich"],["El viernes","Op vrijdag"],["Hizo sol","Het was zonnig"],["Si fuera posible","Als het mogelijk was"],["Balance = equilibrio","Evenwicht / balans"],["Una pizquita de…","Een snufje… (pizca de sal = snufje zout)"],["Llovió (no: hizo lluvia)","Het regende"],["Ayuntamiento","Gemeentehuis / gemeente"],["Qué casualidad","Wat toevallig"],["Los periódicos","De kranten"],["Desbordar","Overstromen / overweldigen"],["Soportar","Verdragen"],["Sólidos","Stevig / solide"],["Sacar (una idea) adelante","(Een idee) verwezenlijken"],["División de poderes","Scheiding der machten"],["Diputados","Kamerleden"],["Mayoría absoluta","Absolute meerderheid"],["Qué lío","Wat een gedoe"],["Musulmanes","Moslims"],["Programa electoral","Verkiezingsprogramma"],["Tengo resaca / estoy de resaca","Ik heb een kater"],["Quiero hacerme el tatuaje","Ik wil de tatoeage laten zetten"],["Sílaba","Lettergreep"],["Deducir","Afleiden (een conclusie trekken)"],["Temblar","Trillen / beven"],["No tiene gracia = no me hace gracia","Het is niet grappig / ik vind het niet leuk"],["Chirriar","Piepen / knarsen"],["Carcajadas","Schaterlachen"],["Liarse · nos hemos liado","In de war raken · we zijn de draad kwijtgeraakt"],["Darlo todo","Alles geven"],["Estar contento/a (informeel)","Aangeschoten zijn"],["Estar en mi salsa","In mijn element zijn"]],
+"x1":[["Pervivir = sobrevivir","Voortbestaan / overleven"],["Destinado/a a…","Bestemd voor…"],["Variable = cambiante","Veranderlijk"],["Ser (el ser)","Wezen"],["Cifra","Cijfer / getal"],["Indecisos","Twijfelaars"],["Individuos","Individuen"],["Minucioso","Nauwgezet"],["(Im)par","(On)even"],["Soler + infinitivo","Gewoonlijk iets doen"],["Exigencia","Eis"],["Lema = eslogan","Slogan / motto"],["Perseverancia","Doorzettingsvermogen"],["Tenacidad = ser cabezón","Vasthoudendheid"],["Predilección","Voorliefde"],["Cesar","Ophouden / stoppen"]],
+"x2":[["Estar pendiente de","Letten op / in de gaten houden"],["Surgir = aparecer","Ontstaan / opduiken"],["Desarrollar","Ontwikkelen"],["Reforzar","Versterken"],["Destacar","Benadrukken / uitblinken"],["Eficacia","Doeltreffendheid"],["Distracción","Afleiding"],["Evitar","Vermijden"],["Entorno","Omgeving"],["Alrededores","Omgeving / omstreken"],["Memorización","Uit het hoofd leren"],["Inconveniente = desventaja","Nadeel"],["Hospitalizado","In het ziekenhuis opgenomen"],["Viaje de novios","Huwelijksreis"],["Luna de miel","Wittebroodsweken / huwelijksreis"],["Desplazamiento","Verplaatsing"],["Restringir","Beperken"],["Sumar = añadir","Optellen / toevoegen"],["Abarcar","Omvatten"],["Oscilar","Schommelen"],["Brindar = dar","Bieden"],["Según","Volgens"],["Exige","Het vereist"],["Temor = miedo","Vrees"],["Afirmar","Bevestigen / beweren"],["Impresora","Printer"]],
+"x3":[["Escalar","Klimmen"],["Rocódromo","Klimhal"],["Un paquete","Een pakket"],["La báscula","De weegschaal"],["Decepcionado","Teleurgesteld"],["Consigo mismo","Met zichzelf"],["Deshacerse de","Zich ontdoen van"],["La fruta está verde","Het fruit is nog niet rijp"],["Para que + subjuntivo","Zodat + subjunctief"],["Por si las moscas / por si acaso","Voor het geval dat"],["Hacer tiempo","De tijd overbruggen"],["Apenas","Nauwelijks"],["Despistarse","Afgeleid raken"],["Ni siquiera","Zelfs niet"],["Incompetente","Incompetent"],["Atravesar","Oversteken / doorkruisen"],["Tembloroso","Trillend"],["Incomprensible","Onbegrijpelijk"],["Puntual ≠ impuntual","Stipt ≠ niet op tijd"],["El café se cayó","De koffie viel om"],["Soñando","Dromend"],["Estar de mal humor","Een slecht humeur hebben"],["Le ha tirado el café encima","Hij/zij heeft koffie over hem/haar heen gegooid"],["Norah dijo que quería agua","Norah zei dat ze water wilde"]],
+"x4":[["Resbaladizo","Glad / glibberig"],["Restregar","Wrijven / schrobben"],["Lengüetazos","Likken (met de tong)"],["Perseguir","Achtervolgen"],["Arrojar","Weggooien / smijten"],["Depredador","Roofdier / jager"],["Cazar","Jagen"],["Vecinos","Buren"],["Ratones muertos","Dode muizen"],["Cariñoso","Lief / aanhankelijk"],["Loro","Papegaai"],["Jaula","Kooi"],["Reptil","Reptiel"],["Tiene que despertarse","Hij moet wakker worden"],["Veterinario","Dierenarts"],["Me suena","Het komt me bekend voor"],["Rama","Tak"],["Jaula de cristal","Terrarium (glazen kooi)"],["Insecto palo","Wandelende tak"],["Caracol","Slak"]]
+};
+
+const DECKS={
+  conectores:{title:"Conectores textuales",all:"Alle categorieën",cats:CONECTORES_CATS,raw:CONECTORES,label:k=>`${k}. ${CONECTORES_CATS[k]}`},
+  palabras:{title:"Spaanse woorden leren",all:"Alle lessen",cats:PALABRAS_CATS,raw:PALABRAS,label:k=>PALABRAS_CATS[k]}
+};
 const $=id=>document.getElementById(id);
 const sel=$("cat");
-sel.add(new Option(`Alle categorieën (${ALL.length})`,"all"));
-for(const k of Object.keys(CATS)) sel.add(new Option(`${k}. ${CATS[k]} (${RAW[k].length})`,k));
+let deckName="conectores",deck=[],i=0,dir="es",shuffled=true;
 
-let deck=[],i=0,dir="es",shuffled=true;
 function load(){try{return JSON.parse(localStorage.getItem("conectores")||"{}")}catch(e){return {}}}
-function save(){try{localStorage.setItem("conectores",JSON.stringify({cat:sel.value,dir}))}catch(e){}}
+const st=load();
+function save(){try{st.dir=dir;st["cat_"+deckName]=sel.value;localStorage.setItem("conectores",JSON.stringify(st))}catch(e){}}
 
+function fillSelect(){
+  const D=DECKS[deckName];
+  const total=Object.values(D.raw).reduce((n,a)=>n+a.length,0);
+  sel.innerHTML="";
+  sel.add(new Option(`${D.all} (${total})`,"all"));
+  for(const k of Object.keys(D.cats)) sel.add(new Option(`${D.label(k)} (${D.raw[k].length})`,k));
+  const saved=st["cat_"+deckName];
+  sel.value=saved&&[...sel.options].some(o=>o.value===saved)?saved:"all";
+}
 function build(){
-  deck=ALL.filter(c=>sel.value==="all"||c.k===sel.value);
+  const D=DECKS[deckName];
+  deck=[];
+  for(const k of Object.keys(D.raw)) if(sel.value==="all"||sel.value===k) D.raw[k].forEach(([es,nl])=>deck.push({es,nl,k}));
   if(shuffled) shuffle(deck);
   i=0;render(false);
 }
 function shuffle(a){for(let j=a.length-1;j>0;j--){const r=Math.floor(Math.random()*(j+1));[a[j],a[r]]=[a[r],a[j]]}}
+function sizeClass(el,t){el.classList.toggle("long",t.length>28&&t.length<=55);el.classList.toggle("xlong",t.length>55)}
 function render(keepFlip){
   const c=deck[i],card=$("card");
   if(!keepFlip) card.classList.remove("flipped");
-  const label=`${c.k}. ${CATS[c.k]}`;
+  const label=DECKS[deckName].label(c.k);
   const front=dir==="es"?c.es:c.nl, back=dir==="es"?c.nl:c.es;
   const set=()=>{
     $("f-word").textContent=front;$("b-word").textContent=back;
+    sizeClass($("f-word"),front);sizeClass($("b-word"),back);
     $("f-cat").textContent=label;$("b-cat").textContent=label;
     $("f-lang").textContent=dir==="es"?"ES":"NL";$("b-lang").textContent=dir==="es"?"NL":"ES";
   };
@@ -160,6 +205,14 @@ function flip(){const c=$("card");c.classList.toggle("flipped");c.dataset.wasFli
 // after the last card a shuffled deck is reshuffled, so every round has a new order
 function go(d){if(d>0&&i===deck.length-1&&shuffled)shuffle(deck);i=(i+d+deck.length)%deck.length;render(false)}
 function setDir(d){dir=d;$("dir-es").setAttribute("aria-pressed",d==="es");$("dir-nl").setAttribute("aria-pressed",d==="nl");save();render(false)}
+function route(){
+  deckName=location.hash==="#palabras"?"palabras":"conectores";
+  for(const n of Object.keys(DECKS)){
+    if(n===deckName) $("tab-"+n).setAttribute("aria-current","page"); else $("tab-"+n).removeAttribute("aria-current");
+  }
+  $("title").textContent=DECKS[deckName].title;
+  fillSelect();build();
+}
 
 $("card").addEventListener("click",flip);
 $("next").addEventListener("click",()=>go(1));
@@ -169,6 +222,7 @@ $("order").addEventListener("click",()=>{shuffled=false;build()});
 $("dir-es").addEventListener("click",()=>setDir("es"));
 $("dir-nl").addEventListener("click",()=>setDir("nl"));
 sel.addEventListener("change",()=>{save();build()});
+window.addEventListener("hashchange",route);
 document.addEventListener("keydown",e=>{
   if(e.target.tagName==="SELECT")return;
   if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}
@@ -181,10 +235,8 @@ let sx=null;
 $("card").addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
 $("card").addEventListener("touchend",e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>50){e.preventDefault();go(dx<0?1:-1)}});
 
-const st=load();
-if(st.cat&&[...sel.options].some(o=>o.value===st.cat)) sel.value=st.cat;
 if(st.dir==="nl"){dir="nl";$("dir-es").setAttribute("aria-pressed","false");$("dir-nl").setAttribute("aria-pressed","true")}
-build();
+route();
 </script>
 </body>
 </html>
