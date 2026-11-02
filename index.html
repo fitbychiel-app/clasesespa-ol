@@ -12,15 +12,16 @@
 :root{
   --bg:#eef2f1; --surface:#ffffff; --ink:#15302e; --muted:#5a706d;
   --line:#d3dedb; --accent:#0f6b63; --accent-ink:#ffffff; --back:#16413d; --back-ink:#f3f7f6; --gold:#c9932b;
+  --ok:#1f7a4a; --ok-bg:#e3f3ea; --bad:#b3362c; --bad-bg:#fbe8e6;
   --display:"Young Serif",Georgia,"Times New Roman",serif;
   --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0e1716; --surface:#172422; --ink:#e6eeec; --muted:#93a8a4;
-  --line:#2a3b38; --accent:#4fb3a8; --accent-ink:#0b1514; --back:#21544f; --back-ink:#f3f7f6; --gold:#e0b257; color-scheme:dark}}
+  --line:#2a3b38; --accent:#4fb3a8; --accent-ink:#0b1514; --back:#21544f; --back-ink:#f3f7f6; --gold:#e0b257; --ok:#4cc38a; --ok-bg:#16352a; --bad:#f07a6e; --bad-bg:#3a1d1a; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0e1716; --surface:#172422; --ink:#e6eeec; --muted:#93a8a4;
-  --line:#2a3b38; --accent:#4fb3a8; --accent-ink:#0b1514; --back:#21544f; --back-ink:#f3f7f6; --gold:#e0b257; color-scheme:dark}
+  --line:#2a3b38; --accent:#4fb3a8; --accent-ink:#0b1514; --back:#21544f; --back-ink:#f3f7f6; --gold:#e0b257; --ok:#4cc38a; --ok-bg:#16352a; --bad:#f07a6e; --bad-bg:#3a1d1a; color-scheme:dark}
 html,body{min-height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 40px}
@@ -65,6 +66,27 @@ kbd{font-family:var(--body);border:1px solid var(--line);border-bottom-width:2px
 .tabs a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .word.long{font-size:clamp(20px,4.6vw,30px)}
 .word.xlong{font-size:clamp(17px,3.8vw,24px)}
+[hidden]{display:none!important}
+/* Test: prompt card + three answer buttons */
+.qcard{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px -18px rgba(10,40,36,.45);
+  min-height:190px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:44px 24px 34px;text-align:center}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;cursor:pointer;font-weight:500;font-size:17px;line-height:1.35}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt .n{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:600;color:var(--muted)}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}
+.opt.ok .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt.bad .n{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt.dim{opacity:.55}
+.feedback{min-height:24px;font-weight:600;margin:0}
+.feedback.ok{color:var(--ok)}.feedback.bad{color:var(--bad)}
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.summary h2{font-family:var(--display);font-weight:400;font-size:28px;margin:0}
+.summary ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.summary li span{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -78,6 +100,7 @@ kbd{font-family:var(--body);border:1px solid var(--line);border-bottom-width:2px
   <nav class="tabs" aria-label="Onderdelen">
     <a href="#conectores" id="tab-conectores">Conectores</a>
     <a href="#palabras" id="tab-palabras">Spaanse woorden leren</a>
+    <a href="#test" id="tab-test">Test</a>
   </nav>
 
   <div class="toolbar">
@@ -88,6 +111,7 @@ kbd{font-family:var(--body);border:1px solid var(--line);border-bottom-width:2px
     </div>
   </div>
 
+  <div id="flash" style="display:contents">
   <div class="scene">
     <button class="card" id="card" aria-label="Kaart omdraaien">
       <div class="face front"><span class="cat" id="f-cat"></span><span class="word" id="f-word"></span><span class="hint">Tik om om te draaien</span><span class="lang" id="f-lang">ES</span></div>
@@ -108,6 +132,32 @@ kbd{font-family:var(--body);border:1px solid var(--line);border-bottom-width:2px
     <button class="btn" id="order">Originele volgorde</button>
   </div>
   <p class="keys">Toetsen: <kbd>spatie</kbd> omdraaien · <kbd>←</kbd> <kbd>→</kbd> vorige / volgende · <kbd>S</kbd> schudden</p>
+  </div>
+
+  <div id="quiz" hidden style="display:contents">
+    <div id="q-play" style="display:contents">
+      <div class="qcard"><span class="word" id="q-word"></span><span class="lang" id="q-lang">ES</span></div>
+      <p class="hint" id="q-ask" style="margin:0">Kies de juiste betekenis</p>
+      <div class="opts" id="q-opts"></div>
+      <p class="feedback" id="q-fb" aria-live="polite"></p>
+      <div class="bar" aria-hidden="true"><span id="q-bar"></span></div>
+      <div class="nav">
+        <span class="count" id="q-score"></span>
+        <span class="count" id="q-count"></span>
+        <button class="btn primary" id="q-next" disabled>Volgende →</button>
+      </div>
+      <p class="keys">Toetsen: <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> antwoord kiezen · <kbd>Enter</kbd> volgende</p>
+    </div>
+    <div class="summary" id="q-sum" hidden>
+      <span class="eyebrow">Resultaat</span>
+      <h2 id="q-total"></h2>
+      <div id="q-wrong"></div>
+      <div class="toolbar">
+        <button class="btn primary" id="q-retry">Fouten oefenen</button>
+        <button class="btn" id="q-new">Nieuwe test</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -204,15 +254,93 @@ function render(keepFlip){
 function flip(){const c=$("card");c.classList.toggle("flipped");c.dataset.wasFlipped=c.classList.contains("flipped")?"1":"0"}
 // after the last card a shuffled deck is reshuffled, so every round has a new order
 function go(d){if(d>0&&i===deck.length-1&&shuffled)shuffle(deck);i=(i+d+deck.length)%deck.length;render(false)}
-function setDir(d){dir=d;$("dir-es").setAttribute("aria-pressed",d==="es");$("dir-nl").setAttribute("aria-pressed",d==="nl");save();render(false)}
+function setDir(d){dir=d;$("dir-es").setAttribute("aria-pressed",d==="es");$("dir-nl").setAttribute("aria-pressed",d==="nl");save();if(mode==="quiz"){if(!$("q-play").hidden&&!qdone)qShow()}else render(false)}
+let mode="flash";
 function route(){
-  deckName=location.hash==="#palabras"?"palabras":"conectores";
-  for(const n of Object.keys(DECKS)){
-    if(n===deckName) $("tab-"+n).setAttribute("aria-current","page"); else $("tab-"+n).removeAttribute("aria-current");
+  const h=location.hash;
+  mode=h==="#test"?"quiz":"flash";
+  deckName=h==="#palabras"?"palabras":"conectores";
+  const tab=mode==="quiz"?"test":deckName;
+  for(const n of ["conectores","palabras","test"]){
+    if(n===tab) $("tab-"+n).setAttribute("aria-current","page"); else $("tab-"+n).removeAttribute("aria-current");
   }
-  $("title").textContent=DECKS[deckName].title;
-  fillSelect();build();
+  $("flash").hidden=mode==="quiz";$("quiz").hidden=mode!=="quiz";
+  $("title").textContent=mode==="quiz"?"Test: conectores":DECKS[deckName].title;
+  fillSelect();
+  if(mode==="quiz") qStart(); else build();
 }
+
+/* ---------- Test (meerkeuze) ----------
+   Wrong options come from a different "family" of categories, so a distractor is never
+   a near-synonym (e.g. contrast B, concession I and expectation K overlap in meaning).
+   Options that share a meaning with the correct answer are skipped as well. */
+const FAMILY={A:"A",B:"BIK",I:"BIK",K:"BIK",C:"C",D:"D",E:"E",F:"FN",N:"FN",G:"GLM",L:"GLM",M:"GLM",H:"H",J:"J"};
+const ALL=[];for(const k of Object.keys(CONECTORES)) CONECTORES[k].forEach(([es,nl])=>ALL.push({es,nl,k}));
+const norm=t=>t.toLowerCase().replace(/\(.*?\)/g,"").replace(/[….,]/g,"").trim();
+const parts=t=>t.split("/").map(norm).filter(Boolean);
+function clash(a,b){
+  if(norm(a.es)===norm(b.es))return true;
+  const pa=parts(a.nl);return parts(b.nl).some(x=>pa.includes(x));
+}
+let qs=[],qi=0,qok=0,qwrong=[],qopts=[],qdone=false;
+function qStart(list){
+  if(!list){list=[];for(const c of ALL) if(sel.value==="all"||sel.value===c.k) list.push(c)}
+  qs=list.slice();shuffle(qs);qi=0;qok=0;qwrong=[];
+  $("q-play").hidden=false;$("q-sum").hidden=true;qShow();
+}
+function qShow(){
+  const c=qs[qi];qdone=false;
+  const field=dir==="es"?"nl":"es";
+  const pool=ALL.filter(o=>FAMILY[o.k]!==FAMILY[c.k]&&!clash(o,c));
+  shuffle(pool);
+  const picks=[];
+  for(const o of pool){if(picks.length===2)break;if(!picks.some(p=>clash(p,o)||norm(p[field])===norm(o[field])))picks.push(o)}
+  qopts=[c,...picks];shuffle(qopts);
+  const q=dir==="es"?c.es:c.nl;
+  $("q-word").textContent=q;sizeClass($("q-word"),q);
+  $("q-lang").textContent=dir==="es"?"ES":"NL";
+  $("q-ask").textContent=dir==="es"?"Kies de juiste Nederlandse betekenis":"Kies de juiste Spaanse connector";
+  const box=$("q-opts");box.innerHTML="";
+  qopts.forEach((o,n)=>{
+    const b=document.createElement("button");b.className="opt";b.type="button";
+    b.innerHTML=`<span class="n">${n+1}</span><span></span>`;b.lastChild.textContent=o[field];
+    b.addEventListener("click",()=>qAnswer(n));box.appendChild(b);
+  });
+  $("q-fb").textContent="";$("q-fb").className="feedback";
+  $("q-next").disabled=true;$("q-next").textContent=qi===qs.length-1?"Resultaat →":"Volgende →";
+  $("q-count").textContent=`${qi+1} / ${qs.length}`;
+  $("q-score").textContent=`${qok} goed`;
+  $("q-bar").style.width=`${qi/qs.length*100}%`;
+}
+function qAnswer(n){
+  if(qdone)return;qdone=true;
+  const c=qs[qi],right=qopts[n]===c,btns=[...$("q-opts").children];
+  btns.forEach((b,j)=>{b.disabled=true;if(qopts[j]===c)b.classList.add("ok");else if(j===n)b.classList.add("bad");else b.classList.add("dim")});
+  if(right){qok++;$("q-fb").textContent="Goed!";$("q-fb").className="feedback ok"}
+  else{qwrong.push(c);$("q-fb").textContent=`Helaas. ${c.es} = ${c.nl}`;$("q-fb").className="feedback bad"}
+  $("q-score").textContent=`${qok} goed`;
+  $("q-bar").style.width=`${(qi+1)/qs.length*100}%`;
+  $("q-next").disabled=false;$("q-next").focus();
+}
+function qNext(){
+  if(!qdone)return;
+  if(qi<qs.length-1){qi++;qShow();return}
+  $("q-play").hidden=true;$("q-sum").hidden=false;
+  const pct=Math.round(qok/qs.length*100);
+  $("q-total").textContent=`${qok} van ${qs.length} goed (${pct}%)`;
+  const w=$("q-wrong");w.innerHTML="";
+  if(qwrong.length){
+    const p=document.createElement("p");p.style.margin="0";p.textContent="Deze wil je nog eens bekijken:";w.appendChild(p);
+    const ul=document.createElement("ul");
+    for(const c of qwrong){const li=document.createElement("li");li.append(c.es+" ");const sp=document.createElement("span");sp.textContent="= "+c.nl;li.append(sp);ul.appendChild(li)}
+    w.appendChild(ul);
+  }else{const p=document.createElement("p");p.style.margin="0";p.textContent="Alles goed. ¡Muy bien!";w.appendChild(p)}
+  $("q-retry").hidden=!qwrong.length;
+  ($("q-retry").hidden?$("q-new"):$("q-retry")).focus();
+}
+$("q-next").addEventListener("click",qNext);
+$("q-retry").addEventListener("click",()=>qStart(qwrong));
+$("q-new").addEventListener("click",()=>qStart());
 
 $("card").addEventListener("click",flip);
 $("next").addEventListener("click",()=>go(1));
@@ -221,10 +349,15 @@ $("shuffle").addEventListener("click",()=>{shuffled=true;build()});
 $("order").addEventListener("click",()=>{shuffled=false;build()});
 $("dir-es").addEventListener("click",()=>setDir("es"));
 $("dir-nl").addEventListener("click",()=>setDir("nl"));
-sel.addEventListener("change",()=>{save();build()});
+sel.addEventListener("change",()=>{save();if(mode==="quiz")qStart();else build()});
 window.addEventListener("hashchange",route);
 document.addEventListener("keydown",e=>{
   if(e.target.tagName==="SELECT")return;
+  if(mode==="quiz"){
+    if(["1","2","3"].includes(e.key)&&!$("q-play").hidden){qAnswer(+e.key-1)}
+    else if(e.key==="Enter"&&!$("q-play").hidden&&qdone&&e.target.id!=="q-next"){e.preventDefault();qNext()}
+    return;
+  }
   if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}
   else if(e.key==="ArrowRight")go(1);
   else if(e.key==="ArrowLeft")go(-1);
